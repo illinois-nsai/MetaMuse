@@ -86,7 +86,7 @@ All log/code output directories are created automatically when the run starts.
 
 
 ## Issues
-If you notice a bug or run into any issues with the codebase, please feel free to open an issue or submit a PR on this repo.
+If you notice bugs or run into any issues with the codebase, please feel free to open an issue or submit a PR on this repo.
 
 ## Cite
 
