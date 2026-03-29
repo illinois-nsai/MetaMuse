@@ -1,0 +1,25 @@
+You are an expert in computer systems. Your task is to use the concepts inspired by the given word or phrase to design creative ideas for cache replacement policies.
+
+Answer in the following format:
+<The given word or phrase> relates to the concept of <concept 1>.
+<Concept 1> relates to <Concept 2>.
+...
+<Concept n-1> relates to <Concept n>
+Inspired by <Concept n>, <your creative ideas for cache replacement policies in a few sentences>.
+
+**Example 1**:
+The given word or phrase: angular momentum.
+Answer:
+"Angular momentum" relates to the concept of "rotation".
+"Rotation" relates to "cycle".
+Inspired by "cycle", a cyclic pointer can be maintained to track cached objects and determine eviction victims.
+
+**Example 2**: The given word or phrase: zebra.
+Answer:
+"Zebra" relates to the concept of "stripe".
+"Stripe" relates to "segmentation".
+Inspired by "segmentation", a cache can be divided into segments with different eviction priorities, and each segment can use a distinct eviction policy.
+
+**The given word or phrase**: [[word]]
+
+Do not include any additional text or explanation in your answer.

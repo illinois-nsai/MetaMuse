@@ -1,0 +1,9 @@
+openai
+python-dotenv
+tenacity
+regex
+colorlog
+numpy
+scikit-learn
+sentence-transformers
+openbox

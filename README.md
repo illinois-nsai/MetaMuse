@@ -1,55 +1,90 @@
-# **MetaMuse: Algorithm Generation via Creative Ideation**
+# MetaMuse: Algorithm Generation via Creative Ideation
 [![arXiv](https://img.shields.io/badge/arXiv-2510.03851-00ff00.svg)](https://arxiv.org/abs/2510.03851)
 
-Work done by researchers **@ UC Berkeley · Microsoft Research · UIUC**
+🎉 **Accepted to ICLR 2026!**
 
+**Purpose:** drive algorithm *invention* rather than imitation by reducing availability bias with a structured creative workflow.
 
-## 📢 News
+**Impact on real system workloads (global cloud provider):**
+- Cache replacement: up to 35.76% fewer cache misses
+- Online bin packing: up to 30.93% reduction in bin usage
+- Solution diversity: up to ~1.8× more diverse than baseline LLM approaches
 
-**🎉 Accepted to ICLR 2026**!! 
-This work marks a significant step in enabling AI systems to *invent novel algorithms*, not just rehash existing heuristics.
+**Core ideas:**
 
+- Performance-grounded diversity: measure diversity using real performance impact.
+- External stimuli steering: use curated keywords to trigger creative reasoning.
+- Waypoint reasoning: synthesize executable solutions through structured checkpoints.
 
-## 💡 Why MetaMuse?
+## Setup
 
-LLMs are amazing at mimicking known designs, but they struggle to *invent* fresh algorithmic strategies due to an inherent *availability bias*—they tend to output what they’ve seen before rather than what *should* be invented.
+### 1) Create a conda environment
 
-**MetaMuse** addresses this issue by introducing a structured *creative ideation workflow* that enables LLMs to take *discontinuous leaps* in solution space.
+```bash
+conda create -n metamuse python=3.8
+conda activate metamuse
+```
 
+### 2) Install dependencies
 
-## 📈 Applications on Real Systems
+```bash
+pip install -r requirements.txt
+```
 
-Evaluated on real-world system workloads from a global cloud provider:
+Notes: `openbox` is installed from PyPI by default. For source install, see https://github.com/PKU-DAIR/open-box.
 
-🔥 **Cache Replacement: Up to 35.76% fewer cache misses**
+### 3) Configure LLM credentials
 
+Create `src/.env` with:
+```
+AZURE_OPENAI_ENDPOINT=...
+AZURE_OPENAI_API_VERSION=...
+AZURE_OPENAI_API_KEY=...
+AZURE_OPENAI_MODEL_GPT=...
+```
 
-🔥 **Online Bin Packing: Up to 30.93% reduction in bin usage**
+Optional alternative providers:
+```
+AZURE_LLAMA33_ENDPOINT=...
+AZURE_LLAMA33_API_VERSION=...
+AZURE_LLAMA33_API_KEY=...
+AZURE_LLAMA33_MODEL=...
 
+AZURE_DEEPSEEKV3_ENDPOINT=...
+AZURE_DEEPSEEKV3_API_VERSION=...
+AZURE_DEEPSEEKV3_API_KEY=...
+AZURE_DEEPSEEKV3_MODEL=...
+```
 
-📌 **MetaMuse also *generates more diverse solutions* — up to ~1.8× more than baseline LLM approaches** — making it not just effective but *creatively explorative*.
+## Run
 
-## 🧩 Core Mechanism
+Example (BPP Online):
+```bash
+python run.py \
+  --algo rsdict \
+  --problem bpp_online \
+  --trace_folder /path/to/trace_folder \
+  --code_folder /path/to/code_out \
+  --tot_llm_call_num 50 \
+  --hint_word_count 5
+```
 
-MetaMuse is built on **three  principles**:
+Example (Cache):
+```bash
+python run.py \
+  --algo rsdict_sf \
+  --problem cache \
+  --trace_folder /path/to/trace_folder \
+  --code_folder /path/to/code_out \
+  --capacity 10000 \
+  --tot_llm_call_num 50 \
+  --hint_word_count 5 \
+  --consider_obj_size
+```
 
-📊 **Performance-grounded diversity** — measure diversity in terms of *real performance impact*, not superficial textual differences.
+All log/code output directories are created automatically when the run starts.
 
-🌟 **External stimuli steering** — uses curated keywords (*external ideas*) to trigger creative reasoning, rather than relying on internal randomness.
-
-🧠 **Waypoint reasoning** — generates executable solutions through structured checkpoints instead of free-form chain-of-thought.
-
-## 🚀 Coming Soon
-
-🔓 **Code release**
-
-🧪 **Plug-and-play APIs**
-
-🌐 **Interactive demo**
-
-## 📖 How to Cite
-
-If you use MetaMuse in your research, please cite:
+## Cite
 
 ```bibtex
 @article{ma2025algorithm,

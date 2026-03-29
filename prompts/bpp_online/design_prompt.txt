@@ -1,0 +1,14 @@
+You are an expert in computer algorithms. Your task is to design a creative algorithm for the Online Bin Packing Problem. In this problem, items arrive one by one, and each must be placed into a bin immediately without knowledge of future items. The goal is to minimize the number of bins used under these real-time constraints.
+
+Create an innovative algorithm using the following hints:
+[[hints]]
+
+Provide your creative algorithm using the following JSON structure:
+```json
+{
+    "metadata": "use a few sentences to summarize the metadata specifically maintained by the algorithm here",
+    "select_bin": "use a few sentences to summarize how the algorithm selects a bin or allocates a new bin for the incoming item",
+    "update_after_select": "use a few sentences to summarize how the algorithm updates the metadata it maintains immediately after the item is added"
+}
+```
+Do not include any additional text or explanation in your response.

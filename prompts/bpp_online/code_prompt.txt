@@ -1,0 +1,62 @@
+You are an expert in Python. Your task is to implement a deterministic algorithm for the Online Bin Packing Problem. In this problem, items arrive one by one, and each must be placed into a bin immediately without knowledge of future items. The goal is to minimize the number of bins used under these real-time constraints. The algorithm must not use any randomness.
+
+You have read-only access to these data and no access to any functions.
+[Begin of accessible data]
+A bin `b` provides the following **read-only** attributes that you can reference:
+- `b.id` (int): A unique identifier for the bin.
+- `b.capacity` (int): A non-negative integer representing the total capacity of the bin.
+- `b.occupied_space` (int): The total space already filled by items in the bin.
+- `b.remaining_space` (int): The unused space still available in the bin.
+
+You can also reference the following **read-only** data:
+- `existing_bins_snapshot` (list): A read-only snapshot list of all bins currently allocated.
+[End of accessible data]
+
+The algorithm you need to implement is described below:
+[Begin of algorithm description]
+[[design]]
+[End of algorithm description]
+
+Implement this algorithm using the Python code framework below. Your implementation must strictly follow the comments in the framework.
+[Begin of Python code framework]
+```python
+# Import any other things you need below. You must not use any randomness. For example, you cannot `import random`. Also, you cannot use any function in `numpy` that uses randomness, such as the functions in `numpy.random`.
+
+# Put tunable constant parameters below
+
+# Put the metadata specifically maintained by the policy below. [[metadata]]
+
+def select_bin(existing_bins_snapshot, item_size_to_add):
+    '''
+    This function defines how the algorithm selects a bin for the incoming item.
+    [[select_bin]]
+    - Args:
+        - `existing_bins_snapshot` (list): A read-only snapshot list of the currently allocated bins.
+        - `item_size_to_add` (int): The size of the incoming item.
+    - Return:
+        - `selected_bin_id` (int): The id of the chosen bin. If you decide to allocate a new bin, return -1.
+    '''
+    selected_bin_id = None
+    # Your code below
+
+    return selected_bin_id
+
+def update_after_select(existing_bins_snapshot, item_size_added, bin_id_selected):
+    '''
+    This function defines how the algorithm updates the metadata it maintains immediately after the item is added.
+    [[update_after_select]]
+    - Args:
+        - `existing_bins_snapshot` (list): A read-only snapshot list of the currently allocated bins.
+        - `item_size_added` (int): The size of the item just added.
+        - `bin_id_selected` (int): The id of the bin that received the item.
+    - Return: `None`
+    '''
+    # Your code below
+```
+[End of code framework]
+
+You **must not** alter the provided code framework. Also, keep the two comments "# Put tunable constant parameters below" and "# Put the metadata specifically maintained by the policy below" unchanged. Wrap your code with "```python" and "```" and include nothing else in your answer.
+
+```python
+<your code here>
+```

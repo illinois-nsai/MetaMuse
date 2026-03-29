@@ -1,0 +1,25 @@
+You are an expert in computer algorithms. Your task is to design a creative algorithm for the Online Bin Packing Problem. In this problem, items arrive one by one, and each must be placed into a bin immediately without knowledge of future items. The goal is to minimize the number of bins used under these real-time constraints.
+
+Answer in the following format:
+<The given word or phrase> relates to the concept of <concept 1>.
+<Concept 1> relates to <Concept 2>.
+...
+<Concept n-1> relates to <Concept n>
+Inspired by <Concept n>, <your creative ideas for the algorithm in a few sentences>.
+
+**Example 1**:
+The given word or phrase: angular momentum.
+Answer:
+"Angular momentum" relates to the concept of "rotation".
+"Rotation" relates to "cycle".
+Inspired by "cycle", a cyclic pointer can be maintained to track the bins.
+
+**Example 2**: The given word or phrase: zebra.
+Answer:
+"Zebra" relates to the concept of "stripe".
+"Stripe" relates to "segmentation".
+Inspired by "segmentation", the bins can be divided into groups with different priorities, and each group can use a distinct algorithm.
+
+**The given word or phrase**: [[word]]
+
+Do not include any additional text or explanation in your answer.
