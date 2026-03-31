@@ -797,7 +797,7 @@ h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
 
     <!-- Main title area -->
     <div class="title-main grid-bg">
-        <div class="eyebrow reveal">ICLR 2026 · Algorithm Generation</div>
+        <div class="eyebrow reveal">ICLR 2026</div>
         <h1 class="reveal">Meta<span class="red">Muse</span></h1>
         <div class="title-h-rule reveal"></div>
         <p class="title-subtitle reveal">Algorithm Generation via Creative Ideation</p>
@@ -846,7 +846,7 @@ h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
                 <ul class="blist">
                     <li class="reveal">LLMs have broad knowledge of <strong>existing algorithms</strong> — but struggle to invent genuinely new ones</li>
                     <li class="reveal">They exhibit <strong>availability bias</strong>: solutions cluster around well-known human heuristics (LRU, FIFO, LFU…), blocking diverse exploration</li>
-                    <li class="reveal">The bias is consistent across all LLM backbones — an <strong>architectural tendency</strong>, not a model quirk</li>
+                    <li class="reveal">The bias is consistent across three LLM backbones — an <strong>architectural tendency</strong>, not a model quirk</li>
                 </ul>
             </div>
 
@@ -910,10 +910,10 @@ h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
      SLIDE 4 — RSDict-SF
      ============================================================ -->
 <section class="slide" id="slide-4" aria-label="RSDict-SF optimization technique">
-    <div class="slide-stripe"><span class="stripe-label">RSDict-SF</span></div>
+    <div class="slide-stripe"><span class="stripe-label">Optimization</span></div>
 
     <div class="slide-body grid-bg">
-        <h2 class="slide-h2 reveal">RSDict-SF: <span class="red">Learning to Steer Better</span></h2>
+        <h2 class="slide-h2 reveal">Optimization: <span class="red">Learning to Steer Better</span></h2>
         <div class="accent-rule reveal"></div>
         <p class="body-p reveal">
             Builds on previous solutions to select the most effective stimuli for the next iteration.
@@ -955,8 +955,8 @@ h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
                 <h2 class="slide-h2 reveal">Application 1: <span class="red">Cache Replacement</span></h2>
                 <div class="accent-rule reveal"></div>
                 <ul class="blist">
-                    <li class="reveal"><strong>96 real-world traces</strong>: ra-fwe &amp; ra-multikey (RetrievalAttention), tencent-storage, alibaba-storage — cache capacity = 10% of distinct objects</li>
-                    <li class="reveal">Baselines: Repeated Sampling, ReEvo, MCTS-AHD, OpenEvolve, PlanSearch, Human Heuristics — MetaMuse reduces miss ratios by <strong>up to 35.76%</strong> vs. FIFO</li>
+                    <li class="reveal">Setup: 96 real-wrold workloads from 4 scenarios; 14 baselines (5 LLM-driven methods + 9 human heuristics)</li>
+                    <li class="reveal">MetaMuse reduces cache miss ratios by <strong>up to 35.76%</strong></li>
                 </ul>
             </div>
 
@@ -998,8 +998,8 @@ h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
                 <h2 class="slide-h2 reveal">Application 2: <span class="red">Online Bin Packing</span></h2>
                 <div class="accent-rule reveal"></div>
                 <ul class="blist">
-                    <li class="reveal"><strong>288 traces</strong>: Falkenauer-U &amp; Scholl-1 (BPPLIB), Weibull (shape=3, scale=45), Gaussian (μ=0.37, σ=0.14)</li>
-                    <li class="reveal">Baselines: Repeated Sampling, ReEvo, MCTS-AHD, OpenEvolve, PlanSearch, Human Heuristics — MetaMuse reduces bin usage by <strong>up to 30.93%</strong> vs. First Fit</li>
+                    <li class="reveal"><strong>Setup: 288 real-wrold workloads from 3 scenarios; 11 baselines (5 LLM-driven methods + 6 human heuristics)</li>
+                    <li class="reveal">MetaMuse reduces bin usage by <strong>up to 30.93%</strong></li>
                 </ul>
             </div>
 
@@ -1098,7 +1098,7 @@ h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
             </div>
             <div class="sum-card reveal">
                 <div class="sum-card-title">Adaptive Optimization</div>
-                <div class="sum-card-text">RSDict-SF uses Gaussian Process Regression to balance exploration and exploitation through learned stimuli selection</div>
+                <div class="sum-card-text">Using Gaussian Process Regression to balance exploration and exploitation through learned stimuli selection</div>
             </div>
         </div>
         <a class="repo-link reveal" href="https://github.com/illinois-nsai/MetaMuse" target="_blank" rel="noopener">
