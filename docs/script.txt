@@ -1,0 +1,48 @@
+Slide 1 — Title (0:00–0:35)
+“Hi everyone, I’m Ruiying Ma, presenting MetaMuse: Algorithm Generation via Creative Ideation. This work asks a simple question: can LLMs actually generate new system algorithms, not just rephrase known heuristics? We study this in two production‑critical tasks—cache replacement and online bin pac
+king—and show large improvements: up to 35.76% fewer cache misses and 30.93% fewer bins used. We also see markedly higher diversity in generated solu
+tions. I’ll first show the core challenge, then the MetaMuse framework, and finally the experimental results.” (arxiv.org
+(https://arxiv.org/pdf/2510.03851))
+
+Slide 2 — Challenge: LLM Availability Bias (0:35–1:15)
+“Repeatedly sampling strong LLMs doesn’t yield genuinely new algorithms. Instead, solutions cluster around familiar heuristics—LRU, LFU, FIFO for cac
+hing, and similarly standard policies in other domains. This is availability bias: the model keeps producing high‑probability ideas from its training
+distribution. We see the same clustering across GPT‑4o, Llama‑3.3‑70B, and DeepSeek‑V3, so it’s not a single model quirk—it’s a structural tendency of
+next‑token prediction. Turning up temperature only weakly mitigates the bias and quickly degrades coherence.” (arxiv.org
+(https://arxiv.org/pdf/2510.03851))
+
+Slide 3 — MetaMuse Overview: Three Self‑Reflection Principles (1:15–2:00)
+“MetaMuse reframes algorithm generation as creative ideation in a discontinuous solution space. It uses three self‑reflection principles.
+First, performance‑based diversity evaluation: we measure diversity in the feedback space—actual performance outcomes—not just textual differences.
+Second, external stimuli steering: instead of hoping randomness yields novelty, we inject external stimuli—like keywords—so the model associates with
+knowledge that seems unrelated to the task.
+Third, waypoint reasoning: rather than free‑form chain‑of‑thought, we break the reasoning into structured checkpoints to turn stimuli into executable
+algorithms.” (arxiv.org (https://arxiv.org/pdf/2510.03851))
+
+Slide 4 — RSDict‑SF: Learning to Steer Better (2:00–2:40)
+“To pick good stimuli, MetaMuse uses two strategies: a random dictionary sampler, and the stronger RSDict‑SF. RSDict‑SF learns from prior iterations.
+It represents each solution by a feedback embedding that captures diversity and usefulness, then sets a steering direction for either exploration or
+exploitation. It predicts which candidate stimulus set will likely move toward that target using Gaussian Process Regression. This lets MetaMuse adap
+tively balance “try something new” versus “push performance.”” (arxiv.org (https://arxiv.org/pdf/2510.03851))
+
+Slide 5 — Application 1: Cache Replacement (2:40–3:25)
+“We evaluate on 96 real‑world cache traces, including RetrievalAttention traces and production storage traces from Tencent and Alibaba. Cache capacity
+is 10% of distinct objects. MetaMuse is compared against repeated sampling, ReEvo, MCTS‑AHD, OpenEvolve, PlanSearch, and human heuristics. Across GPT
+‑4o, Llama‑3.3‑70B, and DeepSeek‑V3, MetaMuse achieves the best miss‑ratio reductions—up to 35.76% fewer misses versus FIFO, and strong gains over ot
+her LLM‑based methods.” (arxiv.org (https://arxiv.org/pdf/2510.03851))
+
+Slide 6 — Application 2: Online Bin Packing (3:25–4:05)
+“In bin packing we use 288 traces: Falkenauer‑U and Scholl‑1 from BPPLIB, plus Weibull and Gaussian‑generated workloads. Baselines are the same. Meta
+Muse reduces bin usage by up to 30.93% versus First Fit, and again outperforms other LLM‑driven approaches. This shows the framework generalizes acro
+ss different systems problems, not just caching.” (arxiv.org (https://arxiv.org/pdf/2510.03851))
+
+Slide 7 — Diversity & Entropy (4:05–4:35)
+“Beyond raw performance, we explicitly measure diversity. MetaMuse yields about 1.8× more distinct solutions and about 1.3× higher entropy in the sol
+ution distribution compared to the best baselines. Waypoint reasoning is a key driver here: removing it significantly drops the number of distinct so
+lutions across all three LLM backbones.” (arxiv.org (https://arxiv.org/pdf/2510.03851))
+
+Slide 8 — Summary (4:35–5:00)
+“To wrap up: MetaMuse tackles availability bias with three self‑reflection principles, steers ideation with learned stimuli selection, and produces a
+lgorithms that are both better and more diverse. In production‑scale workloads, it delivers up to 35.76% cache‑miss reduction and 30.93% bin‑usage re
+duction, while expanding the solution space rather than collapsing to known heuristics. Thanks—happy to take questions.” (arxiv.org
+(https://arxiv.org/pdf/2510.03851))

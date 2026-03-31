@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaMuse: Algorithm Generation via Creative Ideation — ICLR 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   RESET
+   ============================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ============================================
+   CSS VARIABLES — Swiss Modern Theme
+   Change :root to retheme the entire deck
+   ============================================ */
+:root {
+    /* Palette */
+    --white:       #ffffff;
+    --black:       #0a0a0a;
+    --red:         #e82000;
+    --gray-light:  #f3f3f3;
+    --gray-mid:    #999;
+    --grid-line:   rgba(0,0,0,0.032);
+
+    /* Typography */
+    --font-display: 'Archivo', sans-serif;
+    --font-body:    'Nunito', sans-serif;
+
+    /* Font sizes — always clamp() */
+    --title-size: clamp(1.5rem, 5vw, 4rem);
+    --h2-size:    clamp(1.1rem, 3vw, 2.2rem);
+    --h3-size:    clamp(0.9rem, 2.2vw, 1.5rem);
+    --body-size:  clamp(0.7rem, 1.35vw, 1.05rem);
+    --small-size: clamp(0.6rem, 0.95vw, 0.8rem);
+
+    /* Spacing */
+    --slide-padding: clamp(1rem, 4vw, 3.5rem);
+    --content-gap:   clamp(0.4rem, 1.8vw, 1.6rem);
+    --element-gap:   clamp(0.2rem, 0.8vw, 0.8rem);
+
+    /* Left stripe */
+    --stripe-w: clamp(42px, 5vw, 68px);
+
+    /* Animation */
+    --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --dur: 0.55s;
+}
+
+/* ============================================
+   VIEWPORT BASE — mandatory, do not remove
+   ============================================ */
+html, body { height: 100%; overflow-x: hidden; }
+html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+.slide {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+img, .image-container {
+    max-width: 100%;
+    max-height: min(50vh, 400px);
+    object-fit: contain;
+}
+
+/* Responsive breakpoints */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.7rem, 2.5vw, 1.8rem);
+        --content-gap:   clamp(0.3rem, 1.2vw, 0.9rem);
+        --title-size:    clamp(1.2rem, 4.5vw, 2.8rem);
+        --h2-size:       clamp(0.95rem, 2.5vw, 1.7rem);
+    }
+}
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2vw, 1.2rem);
+        --body-size:     clamp(0.65rem, 1.1vw, 0.88rem);
+    }
+    .nav-dots { display: none; }
+}
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 1.5vw, 0.9rem);
+        --h2-size:       clamp(0.85rem, 2vw, 1.3rem);
+        --body-size:     clamp(0.6rem, 1vw, 0.8rem);
+    }
+}
+@media (max-width: 600px) {
+    :root { --title-size: clamp(1.2rem, 7vw, 2.4rem); }
+    .cols-2 { grid-template-columns: 1fr !important; }
+    .summary-grid { grid-template-columns: 1fr !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+    html { scroll-behavior: auto; }
+}
+
+/* ============================================
+   SWISS MODERN BASE STYLES
+   ============================================ */
+body {
+    background: var(--white);
+    font-family: var(--font-body);
+    color: var(--black);
+}
+
+/* Subtle grid background — applied to all slide content areas */
+.grid-bg {
+    background-color: var(--white);
+    background-image:
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 80px 80px;
+}
+
+/* Typography */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 900; }
+h1 { font-size: var(--title-size); line-height: 0.95; letter-spacing: -0.025em; }
+h2 { font-size: var(--h2-size); line-height: 1.1; letter-spacing: -0.015em; }
+.red { color: var(--red); }
+
+/* Accent line under headings */
+.accent-rule {
+    width: min(56px, 7vw);
+    height: 4px;
+    background: var(--red);
+    margin-bottom: clamp(0.5rem, 1.8vh, 1.3rem);
+    flex-shrink: 0;
+}
+
+/* ============================================
+   LEFT RED STRIPE (content slides 2–8)
+   ============================================ */
+.slide-stripe {
+    width: var(--stripe-w);
+    min-width: var(--stripe-w);
+    background: var(--red);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: var(--slide-padding);
+    flex-shrink: 0;
+    overflow: hidden;
+    /* Reveal: clip from top to bottom */
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.75s var(--ease-expo);
+}
+.slide.visible .slide-stripe { clip-path: inset(0 0 0% 0); }
+
+.stripe-label {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(0.48rem, 0.85vw, 0.68rem);
+    color: rgba(255,255,255,0.82);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+}
+
+/* ============================================
+   REVEAL ANIMATIONS
+   Triggered by .visible class (added by JS)
+   ============================================ */
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity var(--dur) var(--ease-expo),
+                transform var(--dur) var(--ease-expo);
+}
+.slide.visible .reveal {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* Delays set by JS (see setupRevealDelays) */
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+.progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--red);
+    width: 0%;
+    z-index: 1000;
+    transition: width 0.3s ease;
+    pointer-events: none;
+}
+
+/* ============================================
+   NAV DOTS
+   ============================================ */
+.nav-dots {
+    position: fixed;
+    right: clamp(8px, 1.5vw, 18px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    z-index: 500;
+}
+.nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.18);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, transform 0.2s;
+}
+.nav-dot.active { background: var(--red); transform: scale(1.5); }
+.nav-dot:hover  { background: var(--black); }
+
+/* ============================================
+   INLINE EDITING
+   ============================================ */
+.edit-hotzone {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80px; height: 80px;
+    z-index: 10000;
+    cursor: pointer;
+}
+.edit-toggle {
+    position: fixed;
+    top: 14px; left: 14px;
+    background: var(--black);
+    color: var(--white);
+    border: none;
+    border-radius: 3px;
+    width: 34px; height: 34px;
+    font-size: 15px;
+    cursor: pointer;
+    z-index: 10001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    display: flex; align-items: center; justify-content: center;
+}
+.edit-toggle.show,
+.edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--red); }
+
+.edit-mode [contenteditable="true"] {
+    outline: 1px dashed rgba(232,32,0,0.35);
+    cursor: text;
+    border-radius: 2px;
+}
+.edit-mode [contenteditable="true"]:focus {
+    outline: 2px solid var(--red);
+    background: rgba(232,32,0,0.04);
+}
+
+/* ============================================
+   SLIDE 1 — TITLE (3-column grid)
+   ============================================ */
+.slide-1 {
+    display: grid;
+    grid-template-columns: var(--stripe-w) 1fr clamp(150px, 21vw, 290px);
+}
+
+.title-stripe {
+    background: var(--red);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: var(--slide-padding);
+    overflow: hidden;
+    clip-path: inset(0 0 100% 0);
+    animation: stripeDown 0.8s var(--ease-expo) 0.1s forwards;
+}
+@keyframes stripeDown { to { clip-path: inset(0 0 0% 0); } }
+
+.title-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--slide-padding);
+    overflow: hidden;
+    position: relative;
+}
+.title-main::before {
+    /* Oversized ghost letter for depth */
+    content: "M";
+    position: absolute;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(10rem, 26vw, 22rem);
+    color: rgba(0,0,0,0.04);
+    right: -3%;
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.05em;
+}
+
+.eyebrow {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--small-size);
+    color: var(--red);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: clamp(0.4rem, 1.5vh, 1rem);
+    position: relative; z-index: 1;
+}
+.title-main h1 { position: relative; z-index: 1; color: var(--black); }
+.title-h-rule {
+    width: min(48%, 200px);
+    height: 3px;
+    background: var(--black);
+    margin: clamp(0.5rem, 2vh, 1.2rem) 0;
+    position: relative; z-index: 1;
+}
+.title-subtitle {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(0.85rem, 1.9vw, 1.45rem);
+    color: #444;
+    line-height: 1.25;
+    position: relative; z-index: 1;
+    max-width: 36ch;
+    letter-spacing: -0.01em;
+}
+.title-authors {
+    font-size: var(--small-size);
+    color: #555;
+    line-height: 1.65;
+    margin-top: clamp(0.5rem, 1.5vh, 1rem);
+    position: relative; z-index: 1;
+}
+.title-authors .aff {
+    color: var(--gray-mid);
+    font-size: 0.9em;
+    margin-top: 0.15em;
+}
+
+/* Right stats panel — black */
+.title-stats {
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--slide-padding);
+    gap: clamp(0.8rem, 2.2vh, 1.8rem);
+    overflow: hidden;
+}
+.t-stat { border-top: 1px solid rgba(255,255,255,0.1); padding-top: clamp(0.5rem, 1.5vh, 1rem); }
+.t-stat:first-child { border-top: none; padding-top: 0; }
+.t-stat-val {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.1rem, 3.2vw, 2.6rem);
+    color: var(--white);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+.t-stat-val .unit { font-size: 0.52em; color: var(--red); }
+.t-stat-lbl {
+    font-size: var(--small-size);
+    color: rgba(255,255,255,0.38);
+    margin-top: 0.25em;
+    line-height: 1.3;
+}
+
+/* ============================================
+   CONTENT SLIDE BODY (slides 2–8)
+   ============================================ */
+.slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: var(--slide-padding);
+    overflow: hidden;
+    min-width: 0;
+}
+
+/* Two-column layout */
+.cols-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.8rem, 2.5vw, 2.5rem);
+    align-items: center;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+.col-l, .col-r {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Heading on content slides */
+.slide-h2 {
+    font-size: var(--h2-size);
+    color: var(--black);
+    margin-bottom: clamp(0.3rem, 1.2vh, 0.9rem);
+    line-height: 1.1;
+    flex-shrink: 0;
+}
+
+/* Bullet list */
+.blist {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.35rem, 1vh, 0.75rem);
+    overflow: hidden;
+}
+.blist li {
+    font-size: var(--body-size);
+    color: #383838;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55em;
+    flex-shrink: 0;
+}
+.blist li::before {
+    content: "—";
+    color: var(--red);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 0.05em;
+}
+.blist strong { color: var(--black); font-weight: 700; }
+
+/* Figure box */
+.fig-box {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.3rem, 0.8vh, 0.6rem);
+    align-items: center;
+    overflow: hidden;
+    min-height: 0;
+}
+.fig-box img {
+    max-width: 100%;
+    max-height: min(50vh, 360px);
+    object-fit: contain;
+    border: 1px solid rgba(0,0,0,0.09);
+}
+.fig-caption {
+    font-size: var(--small-size);
+    color: var(--gray-mid);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.3;
+}
+
+/* Body paragraph */
+.body-p {
+    font-size: var(--body-size);
+    color: #444;
+    line-height: 1.6;
+    flex-shrink: 0;
+}
+
+/* ============================================
+   SLIDE 3 — OVERVIEW (image-dominant)
+   ============================================ */
+.overview-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 1.3vh, 0.9rem);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+}
+.overview-img {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+}
+.overview-img img {
+    max-width: 100%;
+    max-height: min(46vh, 360px);
+    object-fit: contain;
+}
+.principles-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: clamp(0.35rem, 0.9vw, 0.75rem);
+    flex-shrink: 0;
+}
+.p-tag {
+    background: var(--gray-light);
+    border-left: 3px solid var(--red);
+    padding: clamp(0.4rem, 1.1vh, 0.8rem) clamp(0.5rem, 1.2vw, 1rem);
+}
+.p-tag-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: var(--body-size);
+    color: var(--black);
+    line-height: 1.25;
+    margin-bottom: 0.3em;
+}
+.p-tag-title .pn { color: var(--red); }
+.p-tag-desc {
+    font-size: var(--small-size);
+    color: #555;
+    line-height: 1.4;
+    font-family: var(--font-body);
+    font-weight: 400;
+}
+
+/* ============================================
+   SLIDE 4 — RSDict-SF (3 horizontal step cards)
+   ============================================ */
+.steps-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: clamp(0.5rem, 1.4vw, 1.2rem);
+    margin-top: clamp(0.5rem, 1.8vh, 1.4rem);
+    flex-shrink: 0;
+}
+.step-card {
+    background: var(--black);
+    color: var(--white);
+    padding: clamp(0.6rem, 1.8vh, 1.2rem) clamp(0.7rem, 1.5vw, 1.2rem);
+    position: relative;
+    overflow: hidden;
+}
+.step-ghost {
+    position: absolute;
+    top: -0.1em; right: 0.15em;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    color: rgba(255,255,255,0.06);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+}
+.step-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: var(--body-size);
+    color: var(--red);
+    margin-bottom: 0.4em;
+    position: relative; z-index: 1;
+}
+.step-desc {
+    font-size: var(--small-size);
+    color: rgba(255,255,255,0.68);
+    line-height: 1.45;
+    position: relative; z-index: 1;
+}
+
+/* ============================================
+   SLIDE 7 — DIVERSITY (stat callouts)
+   ============================================ */
+.stat-callouts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.4rem, 1.2vw, 1rem);
+    margin-bottom: clamp(0.5rem, 1.8vh, 1.3rem);
+    flex-shrink: 0;
+}
+.s-callout {
+    background: var(--gray-light);
+    border-top: 4px solid var(--red);
+    padding: clamp(0.5rem, 1.5vh, 1.1rem) clamp(0.6rem, 1.5vw, 1rem);
+}
+.s-callout-val {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.3rem, 3.5vw, 2.8rem);
+    color: var(--black);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+.s-callout-val span { color: var(--red); }
+.s-callout-lbl {
+    font-size: var(--small-size);
+    color: #666;
+    margin-top: 0.3em;
+    line-height: 1.3;
+}
+
+/* ============================================
+   SLIDE 8 — SUMMARY (2×2 cards)
+   ============================================ */
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.5rem, 1.4vw, 1.1rem);
+    margin-top: clamp(0.5rem, 1.8vh, 1.3rem);
+    flex-shrink: 0;
+}
+.sum-card {
+    border: 1px solid rgba(0,0,0,0.1);
+    padding: clamp(0.6rem, 1.8vh, 1.2rem) clamp(0.7rem, 1.5vw, 1.2rem);
+    padding-left: calc(clamp(0.7rem, 1.5vw, 1.2rem) + 4px);
+    position: relative;
+    overflow: hidden;
+}
+.sum-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--red);
+}
+.sum-card-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: var(--body-size);
+    color: var(--black);
+    margin-bottom: 0.4em;
+}
+.sum-card-text {
+    font-size: var(--small-size);
+    color: #555;
+    line-height: 1.45;
+}
+
+/* ============================================
+   TOP-BOTTOM LAYOUT (slides 2, 5, 6, 7)
+   text / stats at top, figures at bottom
+   ============================================ */
+.top-bottom-layout {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.4rem, 1.4vh, 1rem);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+.text-section { flex-shrink: 0; }
+
+/* Row of N figures that fills remaining height */
+.figs-row {
+    display: grid;
+    gap: clamp(0.35rem, 0.9vw, 0.75rem);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    align-items: center;
+}
+.figs-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Figure item (used inside figs-row or figs-2x2) */
+.fig-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25em;
+    overflow: hidden;
+    min-height: 0;
+}
+.fig-item img {
+    max-width: 100%;
+    max-height: min(38vh, 300px);
+    object-fit: contain;
+    border: 1px solid rgba(0,0,0,0.09);
+}
+.fig-item figcaption {
+    font-size: clamp(0.5rem, 0.78vw, 0.65rem);
+    color: var(--gray-mid);
+    text-align: center;
+    font-style: italic;
+    line-height: 1.2;
+    flex-shrink: 0;
+}
+
+/* 2×2 grid for 4 figures */
+.figs-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(0.3rem, 0.8vw, 0.65rem);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    align-items: stretch;
+}
+
+.fig-item {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* .fig-item figcaption {
+    height: 1.5em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+
+.fig-item figcaption {
+    flex-shrink: 0;          /* 👈 never shrink */
+    margin-top: 0.3em;
+    text-align: center;
+}
+
+.figs-2x2 .fig-item img {
+    width: 100%;
+    height: calc(100% - 1.5em);
+    object-fit: contain;
+}
+/* .figs-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(0.3rem, 0.8vw, 0.65rem);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+.figs-2x2 .fig-item img {
+    max-height: min(22vh, 175px);
+} */
+
+/* GitHub link (slide 8) */
+.repo-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    margin-top: clamp(0.5rem, 1.8vh, 1.3rem);
+    padding: 0.45em 1em;
+    border: 2px solid var(--red);
+    color: var(--red);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: var(--body-size);
+    text-decoration: none;
+    letter-spacing: 0.03em;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+.repo-link:hover { background: var(--red); color: var(--white); }
+.repo-link svg { width: 1.1em; height: 1.1em; flex-shrink: 0; }
+
+/* ============================================
+   BOTTOM ACCENT BAR — decorative
+   ============================================ */
+.bottom-bar {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, var(--red) 0%, var(--red) var(--stripe-w), rgba(0,0,0,0.07) var(--stripe-w));
+    pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- Progress bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Navigation dots -->
+<nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
+
+<!-- Inline edit controls -->
+<div class="edit-hotzone" id="editHotzone"></div>
+<button class="edit-toggle" id="editToggle" title="Toggle edit mode (E)" aria-label="Toggle edit mode">✏</button>
+
+
+<!-- ============================================================
+     SLIDE 1 — TITLE
+     ============================================================ -->
+<section class="slide slide-1 visible" id="slide-1" aria-label="Title slide">
+
+    <!-- Red stripe -->
+    <div class="title-stripe">
+        <span class="stripe-label">ICLR 2026</span>
+    </div>
+
+    <!-- Main title area -->
+    <div class="title-main grid-bg">
+        <div class="eyebrow reveal">ICLR 2026 · Algorithm Generation</div>
+        <h1 class="reveal">Meta<span class="red">Muse</span></h1>
+        <div class="title-h-rule reveal"></div>
+        <p class="title-subtitle reveal">Algorithm Generation via Creative Ideation</p>
+        <div class="title-authors reveal">
+            Ruiying Ma<sup>1</sup> &nbsp;&nbsp; Chieh-Jan Mike Liang<sup>2</sup> &nbsp;&nbsp; Yanjie Gao<sup>2</sup> &nbsp;&nbsp; Francis Y. Yan<sup>3</sup>
+            <div class="aff"><sup>1</sup>UC Berkeley &nbsp;&nbsp; <sup>2</sup>Microsoft Research &nbsp;&nbsp; <sup>3</sup>UIUC</div>
+        </div>
+    </div>
+
+    <!-- Stats panel -->
+    <div class="title-stats">
+        <div class="t-stat reveal">
+            <div class="t-stat-val">35.76<span class="unit">%</span></div>
+            <div class="t-stat-lbl">Cache Miss Reduction</div>
+        </div>
+        <div class="t-stat reveal">
+            <div class="t-stat-val">30.93<span class="unit">%</span></div>
+            <div class="t-stat-lbl">Bin Usage Reduction</div>
+        </div>
+        <div class="t-stat reveal">
+            <div class="t-stat-val">1.8<span class="unit">×</span></div>
+            <div class="t-stat-lbl">More Diverse Solutions</div>
+        </div>
+        <div class="t-stat reveal">
+            <div class="t-stat-val">1.3<span class="unit">×</span></div>
+            <div class="t-stat-lbl">Higher Entropy</div>
+        </div>
+    </div>
+
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 2 — CHALLENGE: LLM AVAILABILITY BIAS
+     ============================================================ -->
+<section class="slide" id="slide-2" aria-label="Challenge: LLM availability bias">
+    <div class="slide-stripe"><span class="stripe-label">Challenge</span></div>
+
+    <div class="slide-body grid-bg">
+        <div class="top-bottom-layout">
+
+            <div class="text-section">
+                <h2 class="slide-h2 reveal">The Challenge: <span class="red">LLM Availability Bias</span></h2>
+                <div class="accent-rule reveal"></div>
+                <ul class="blist">
+                    <li class="reveal">LLMs have broad knowledge of <strong>existing algorithms</strong> — but struggle to invent genuinely new ones</li>
+                    <li class="reveal">They exhibit <strong>availability bias</strong>: solutions cluster around well-known human heuristics (LRU, FIFO, LFU…), blocking diverse exploration</li>
+                    <li class="reveal">The bias is consistent across all LLM backbones — an <strong>architectural tendency</strong>, not a model quirk</li>
+                </ul>
+            </div>
+
+            <div class="figs-row figs-row-3">
+                <figure class="fig-item reveal">
+                    <img src="assets/availability_bias_gpt4o.png" alt="Availability bias - GPT-4o">
+                    <figcaption>GPT-4o</figcaption>
+                </figure>
+                <figure class="fig-item reveal">
+                    <img src="assets/availability_bias_llama.png" alt="Availability bias - Llama 3.3-70B">
+                    <figcaption>Llama 3.3-70B</figcaption>
+                </figure>
+                <figure class="fig-item reveal">
+                    <img src="assets/availability_bias_deepseek.png" alt="Availability bias - DeepSeek-V3">
+                    <figcaption>DeepSeek-V3</figcaption>
+                </figure>
+            </div>
+
+        </div>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 3 — METAMUSE OVERVIEW (workflow figure)
+     ============================================================ -->
+<section class="slide" id="slide-3" aria-label="MetaMuse overview">
+    <div class="slide-stripe"><span class="stripe-label">Overview</span></div>
+
+    <div class="slide-body grid-bg">
+        <div class="overview-wrap">
+            <h2 class="slide-h2 reveal">MetaMuse: <span class="red">Three Self-Reflection Principles</span></h2>
+
+            <div class="overview-img reveal">
+                <img src="assets/overview.png"
+                     alt="MetaMuse workflow: Evaluating Diversity → Steering with External Stimuli → Waypoint Reasoning">
+            </div>
+
+            <div class="principles-row">
+                <div class="p-tag reveal">
+                    <div class="p-tag-title"><span class="pn">① </span>Performance-Based Diversity Evaluation</div>
+                    <div class="p-tag-desc">Measures diversity in measurable performance space, not abstract idea space</div>
+                </div>
+                <div class="p-tag reveal">
+                    <div class="p-tag-title"><span class="pn">② </span>External Stimuli Steering</div>
+                    <div class="p-tag-desc">Guides LLM ideation via external stimuli rather than internal randomness</div>
+                </div>
+                <div class="p-tag reveal">
+                    <div class="p-tag-title"><span class="pn">③ </span>Waypoint Reasoning</div>
+                    <div class="p-tag-desc">Constructs executable algorithms through structured waypoints, not free-form CoT</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 4 — RSDict-SF
+     ============================================================ -->
+<section class="slide" id="slide-4" aria-label="RSDict-SF optimization technique">
+    <div class="slide-stripe"><span class="stripe-label">RSDict-SF</span></div>
+
+    <div class="slide-body grid-bg">
+        <h2 class="slide-h2 reveal">RSDict-SF: <span class="red">Learning to Steer Better</span></h2>
+        <div class="accent-rule reveal"></div>
+        <p class="body-p reveal">
+            Builds on previous solutions to select the most effective stimuli for the next iteration.
+            Uses <strong>Gaussian Process Regression</strong> trained on (stimuli → diversity + performance) pairs from prior runs.
+        </p>
+
+        <div class="steps-row">
+            <div class="step-card reveal">
+                <div class="step-ghost">①</div>
+                <div class="step-title">Train</div>
+                <div class="step-desc">Fit GP models on the history of stimuli sets and the diversity + performance of the solutions they produced</div>
+            </div>
+            <div class="step-card reveal">
+                <div class="step-ghost">②</div>
+                <div class="step-title">Predict</div>
+                <div class="step-desc">Generate two candidate stimuli sets; GP predicts expected diversity and usefulness for each</div>
+            </div>
+            <div class="step-card reveal">
+                <div class="step-ghost">③</div>
+                <div class="step-title">Select</div>
+                <div class="step-desc">Choose the set that fits the current goal — <em>exploration</em> (diversity) or <em>exploitation</em> (performance)</div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 5 — EXPERIMENTS: CACHING
+     ============================================================ -->
+<section class="slide" id="slide-5" aria-label="Caching experiments">
+    <div class="slide-stripe"><span class="stripe-label">Caching</span></div>
+
+    <div class="slide-body grid-bg">
+        <div class="top-bottom-layout">
+
+            <div class="text-section">
+                <h2 class="slide-h2 reveal">Application 1: <span class="red">Cache Replacement</span></h2>
+                <div class="accent-rule reveal"></div>
+                <ul class="blist">
+                    <li class="reveal"><strong>96 real-world traces</strong>: ra-fwe &amp; ra-multikey (RetrievalAttention), tencent-storage, alibaba-storage — cache capacity = 10% of distinct objects</li>
+                    <li class="reveal">Baselines: Repeated Sampling, ReEvo, MCTS-AHD, OpenEvolve, PlanSearch, Human Heuristics — MetaMuse reduces miss ratios by <strong>up to 35.76%</strong> vs. FIFO</li>
+                </ul>
+            </div>
+
+            <div class="figs-2x2 reveal">
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_cache_gpt4o.png" alt="Cache miss ratio reduction - GPT-4o">
+                    <figcaption>GPT-4o</figcaption>
+                </figure>
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_cache_llama.png" alt="Cache miss ratio reduction - Llama 3.3-70B">
+                    <figcaption>Llama 3.3-70B</figcaption>
+                </figure>
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_cache_deepseek.png" alt="Cache miss ratio reduction - DeepSeek-V3">
+                    <figcaption>DeepSeek-V3</figcaption>
+                </figure>
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_cache_human_heuristics.png" alt="Cache miss ratio reduction - Human Heuristics">
+                    <figcaption>Human Heuristics</figcaption>
+                </figure>
+            </div>
+
+        </div>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 6 — EXPERIMENTS: ONLINE BIN PACKING
+     ============================================================ -->
+<section class="slide" id="slide-6" aria-label="Online bin packing experiments">
+    <div class="slide-stripe"><span class="stripe-label">Bin Packing</span></div>
+
+    <div class="slide-body grid-bg">
+        <div class="top-bottom-layout">
+
+            <div class="text-section">
+                <h2 class="slide-h2 reveal">Application 2: <span class="red">Online Bin Packing</span></h2>
+                <div class="accent-rule reveal"></div>
+                <ul class="blist">
+                    <li class="reveal"><strong>288 traces</strong>: Falkenauer-U &amp; Scholl-1 (BPPLIB), Weibull (shape=3, scale=45), Gaussian (μ=0.37, σ=0.14)</li>
+                    <li class="reveal">Baselines: Repeated Sampling, ReEvo, MCTS-AHD, OpenEvolve, PlanSearch, Human Heuristics — MetaMuse reduces bin usage by <strong>up to 30.93%</strong> vs. First Fit</li>
+                </ul>
+            </div>
+
+            <div class="figs-2x2 reveal">
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_bpp_gpt4o.png" alt="Bin usage reduction - GPT-4o">
+                    <figcaption>GPT-4o</figcaption>
+                </figure>
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_bpp_llama.png" alt="Bin usage reduction - Llama 3.3-70B">
+                    <figcaption>Llama 3.3-70B</figcaption>
+                </figure>
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_bpp_deepseek.png" alt="Bin usage reduction - DeepSeek-V3">
+                    <figcaption>DeepSeek-V3</figcaption>
+                </figure>
+                <figure class="fig-item">
+                    <img src="assets/usefulness_box_bpp_human_heuristics.png" alt="Bin usage reduction - Human Heuristics">
+                    <figcaption>Human Heuristics</figcaption>
+                </figure>
+            </div>
+
+        </div>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 7 — DIVERSITY & ENTROPY
+     ============================================================ -->
+<section class="slide" id="slide-7" aria-label="Diversity and entropy results">
+    <div class="slide-stripe"><span class="stripe-label">Diversity</span></div>
+
+    <div class="slide-body grid-bg">
+        <div class="top-bottom-layout">
+
+            <div class="text-section">
+                <h2 class="slide-h2 reveal">Less Bias, <span class="red">More Diversity</span></h2>
+                <div class="accent-rule reveal"></div>
+                <div class="stat-callouts reveal">
+                    <div class="s-callout">
+                        <div class="s-callout-val">1.8<span>×</span></div>
+                        <div class="s-callout-lbl">More diverse solutions vs. best baseline</div>
+                    </div>
+                    <div class="s-callout">
+                        <div class="s-callout-val">1.3<span>×</span></div>
+                        <div class="s-callout-lbl">Higher solution distribution entropy</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="figs-row figs-row-3">
+                <figure class="fig-item reveal">
+                    <img src="assets/entropy_gpt4o.png" alt="Solution distribution entropy - GPT-4o">
+                    <figcaption>GPT-4o</figcaption>
+                </figure>
+                <figure class="fig-item reveal">
+                    <img src="assets/entropy_llama.png" alt="Solution distribution entropy - Llama 3.3-70B">
+                    <figcaption>Llama 3.3-70B</figcaption>
+                </figure>
+                <figure class="fig-item reveal">
+                    <img src="assets/entropy_deepseek.png" alt="Solution distribution entropy - DeepSeek-V3">
+                    <figcaption>DeepSeek-V3</figcaption>
+                </figure>
+            </div>
+
+        </div>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<!-- ============================================================
+     SLIDE 8 — SUMMARY
+     ============================================================ -->
+<section class="slide" id="slide-8" aria-label="Summary">
+    <div class="slide-stripe"><span class="stripe-label">Summary</span></div>
+
+    <div class="slide-body grid-bg">
+        <h2 class="slide-h2 reveal">Summary: <span class="red">What MetaMuse Achieves</span></h2>
+        <div class="accent-rule reveal"></div>
+
+        <div class="summary-grid">
+            <div class="sum-card reveal">
+                <div class="sum-card-title">Bias Mitigation</div>
+                <div class="sum-card-text">Three self-reflection principles break LLMs' availability bias and push exploration beyond familiar human heuristics</div>
+            </div>
+            <div class="sum-card reveal">
+                <div class="sum-card-title">Superior Diversity</div>
+                <div class="sum-card-text">1.8× more diverse solutions with 1.3× higher entropy — broadest solution coverage among all LLM-driven methods</div>
+            </div>
+            <div class="sum-card reveal">
+                <div class="sum-card-title">Real-World Performance</div>
+                <div class="sum-card-text">Up to 35.76% cache miss reduction and 30.93% bin usage reduction on production cloud workloads</div>
+            </div>
+            <div class="sum-card reveal">
+                <div class="sum-card-title">Adaptive Optimization</div>
+                <div class="sum-card-text">RSDict-SF uses Gaussian Process Regression to balance exploration and exploitation through learned stimuli selection</div>
+            </div>
+        </div>
+        <a class="repo-link reveal" href="https://github.com/illinois-nsai/MetaMuse" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            github.com/illinois-nsai/MetaMuse
+        </a>
+    </div>
+    <div class="bottom-bar"></div>
+</section>
+
+
+<script>
+/* ============================================================
+   SLIDE PRESENTATION CONTROLLER
+   ============================================================ */
+class SlidePresentation {
+    constructor() {
+        this.slides     = Array.from(document.querySelectorAll('.slide'));
+        this.total      = this.slides.length;
+        this.current    = 0;
+        this.bar        = document.getElementById('progressBar');
+        this.dotsWrap   = document.getElementById('navDots');
+        this.dots       = [];
+
+        this.buildDots();
+        this.setupObserver();
+        this.setupKeyboard();
+        this.setupTouch();
+        this.setupScrollBar();
+
+        // First slide is always visible
+        this.activate(0, true);
+    }
+
+    /* Build nav dots */
+    buildDots() {
+        this.slides.forEach((_, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'nav-dot';
+            btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+            btn.addEventListener('click', () => this.go(i));
+            this.dotsWrap.appendChild(btn);
+            this.dots.push(btn);
+        });
+    }
+
+    /* Intersection Observer — adds .visible and staggered reveal delays */
+    setupObserver() {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const slide = entry.target;
+                    const idx   = this.slides.indexOf(slide);
+                    this.activate(idx, false);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        this.slides.forEach(s => obs.observe(s));
+    }
+
+    activate(idx, immediate) {
+        this.current = idx;
+        const slide  = this.slides[idx];
+
+        // Set stagger delays on reveal elements
+        slide.querySelectorAll('.reveal').forEach((el, i) => {
+            el.style.transitionDelay = (i * 0.08) + 's';
+        });
+        slide.classList.add('visible');
+
+        // Update dots
+        this.dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+        // Update bar
+        const pct = this.total > 1 ? (idx / (this.total - 1)) * 100 : 100;
+        this.bar.style.width = pct + '%';
+    }
+
+    /* Keyboard navigation */
+    setupKeyboard() {
+        document.addEventListener('keydown', e => {
+            if (document.body.classList.contains('edit-mode') &&
+                document.activeElement &&
+                document.activeElement.getAttribute('contenteditable') === 'true') return;
+
+            switch (e.key) {
+                case 'ArrowDown': case 'ArrowRight': case ' ': case 'PageDown':
+                    e.preventDefault(); this.next(); break;
+                case 'ArrowUp': case 'ArrowLeft': case 'PageUp':
+                    e.preventDefault(); this.prev(); break;
+                case 'Home': e.preventDefault(); this.go(0); break;
+                case 'End':  e.preventDefault(); this.go(this.total - 1); break;
+            }
+        });
+    }
+
+    /* Touch / swipe */
+    setupTouch() {
+        let startY = 0;
+        document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+        document.addEventListener('touchend',   e => {
+            const delta = startY - e.changedTouches[0].clientY;
+            if (Math.abs(delta) > 45) delta > 0 ? this.next() : this.prev();
+        }, { passive: true });
+    }
+
+    /* Progress bar on scroll */
+    setupScrollBar() {
+        window.addEventListener('scroll', () => {
+            const max = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+            this.bar.style.width = pct + '%';
+        }, { passive: true });
+    }
+
+    go(idx) {
+        if (idx >= 0 && idx < this.total)
+            this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+    }
+    next() { this.go(this.current + 1); }
+    prev() { this.go(this.current - 1); }
+}
+
+
+/* ============================================================
+   INLINE EDITOR
+   User opted in — Edit mode: hover top-left corner or press E
+   Ctrl+S saves to localStorage, auto-loads on next visit
+   ============================================================ */
+class InlineEditor {
+    constructor() {
+        this.isActive   = false;
+        this.toggle     = document.getElementById('editToggle');
+        this.hotzone    = document.getElementById('editHotzone');
+        this.STORE_KEY  = 'metamuse_edits_v1';
+        this.hideTimer  = null;
+
+        this.setupHover();
+        this.setupKeys();
+        this.loadSaved();
+    }
+
+    /* Hotzone hover with 400ms grace period */
+    setupHover() {
+        const show = () => { clearTimeout(this.hideTimer); this.toggle.classList.add('show'); };
+        const hide = () => {
+            this.hideTimer = setTimeout(() => {
+                if (!this.isActive) this.toggle.classList.remove('show');
+            }, 400);
+        };
+
+        this.hotzone.addEventListener('mouseenter', show);
+        this.hotzone.addEventListener('mouseleave', hide);
+        this.toggle.addEventListener('mouseenter', show);
+        this.toggle.addEventListener('mouseleave', hide);
+
+        this.hotzone.addEventListener('click', () => this.flip());
+        this.toggle.addEventListener('click',  () => this.flip());
+    }
+
+    /* Keyboard: E to toggle, Ctrl+S to save */
+    setupKeys() {
+        document.addEventListener('keydown', e => {
+            if ((e.key === 'e' || e.key === 'E') &&
+                !(document.activeElement && document.activeElement.getAttribute('contenteditable') === 'true')) {
+                this.flip();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 's' && this.isActive) {
+                e.preventDefault();
+                this.save();
+                this.toast('Saved to browser storage');
+            }
+        });
+    }
+
+    flip() {
+        this.isActive = !this.isActive;
+        document.body.classList.toggle('edit-mode', this.isActive);
+        this.toggle.classList.toggle('active', this.isActive);
+        this.toggle.classList.add('show');
+        this.toggle.title = this.isActive
+            ? 'Exit edit mode (E) — Ctrl+S to save'
+            : 'Edit mode (E)';
+
+        if (this.isActive) {
+            this.makeEditable();
+        } else {
+            this.stripEditable();
+            this.save();
+        }
+    }
+
+    /* Selectors for all user-visible text elements */
+    targets() {
+        return document.querySelectorAll(
+            'h1, h2, h3, p, li, .eyebrow, .t-stat-val, .t-stat-lbl, ' +
+            '.step-title, .step-desc, .sum-card-title, .sum-card-text, ' +
+            '.p-tag, .fig-caption, .s-callout-val, .s-callout-lbl, ' +
+            '.body-p, .stripe-label'
+        );
+    }
+
+    makeEditable() {
+        this.targets().forEach((el, i) => {
+            el.setAttribute('contenteditable', 'true');
+            el.dataset.eid = i;
+        });
+    }
+
+    stripEditable() {
+        document.querySelectorAll('[contenteditable]').forEach(el =>
+            el.setAttribute('contenteditable', 'false')
+        );
+    }
+
+    save() {
+        const out = {};
+        document.querySelectorAll('[data-eid]').forEach(el => {
+            out[el.dataset.eid] = el.innerHTML;
+        });
+        localStorage.setItem(this.STORE_KEY, JSON.stringify(out));
+    }
+
+    loadSaved() {
+        const raw = localStorage.getItem(this.STORE_KEY);
+        if (!raw) return;
+        try {
+            const data = JSON.parse(raw);
+            this.makeEditable();
+            Object.entries(data).forEach(([id, html]) => {
+                const el = document.querySelector('[data-eid="' + id + '"]');
+                if (el) el.innerHTML = html;
+            });
+            this.stripEditable();
+            // Clean up data-eid after load so they don't appear in DOM
+            document.querySelectorAll('[data-eid]').forEach(el => el.removeAttribute('data-eid'));
+        } catch (_) { /* malformed storage — ignore */ }
+    }
+
+    toast(msg) {
+        const el = document.createElement('div');
+        el.textContent = msg;
+        el.style.cssText = [
+            'position:fixed', 'bottom:22px', 'left:50%', 'transform:translateX(-50%)',
+            'background:#0a0a0a', 'color:#fff', 'padding:7px 18px',
+            "font-family:'Nunito',sans-serif", 'font-size:13px',
+            'border-left:3px solid #e82000', 'z-index:99999',
+            'pointer-events:none', 'white-space:nowrap',
+            'animation:_fadeOut 2s 0.6s forwards'
+        ].join(';');
+        document.body.appendChild(el);
+        const s = document.createElement('style');
+        s.textContent = '@keyframes _fadeOut{to{opacity:0}}';
+        document.head.appendChild(s);
+        setTimeout(() => { el.remove(); s.remove(); }, 3000);
+    }
+}
+
+/* Init */
+const presentation = new SlidePresentation();
+const editor       = new InlineEditor();
+</script>
+</body>
+</html>
